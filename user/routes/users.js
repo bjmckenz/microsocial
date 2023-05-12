@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,datecreated ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -579,7 +579,8 @@ router.post('/users', (req, res) => {
     user = user.user;
   }
 
-  errors = validate.CreatingUser(user, '{body}')
+  errors = validate.CreatingUser(user, '{body}')// Seemse to require message, severity
+  console.log(errors)
   if (errors.length) {
     log_event({
       severity: 'Low',
@@ -591,12 +592,13 @@ router.post('/users', (req, res) => {
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).end()
     return
   }
+  const stmt = db.prepare(`INSERT INTO users (name, password, datecreated)
+                 VALUES (?, ?, ?)`)
 
-  const stmt = db.prepare(`INSERT INTO users (name, password)
-                 VALUES (?, ?)`)
-
+  let info = {}
   try {
-    info = stmt.run([user.name, user.password])
+    user.datecreated = Date.now()
+    info = stmt.run([user.name, user.password, user.datecreated])
   } catch (err) {
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       log_event({
@@ -612,7 +614,7 @@ router.post('/users', (req, res) => {
     log_event({
       severity: 'Low',
       type: 'CannotCreateUser',
-      message: `Create ${[ser.name, user.password]} failed: ${err}`
+      message: `Create ${[user.name, user.password]} failed: ${err}` // moved ser.name -> user.name
     })
     console.log('insert error: ', { err, info, user })
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end()

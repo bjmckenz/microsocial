@@ -56,7 +56,7 @@ router.get("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare("SELECT id,name FROM users where id = ?");
+  const stmt = db.prepare("SELECT id,name,datecreated FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {
@@ -140,7 +140,7 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
+  const stmt = db.prepare(`UPDATE users SET name=?, password=?, WHERE id=?`);
 
   try {
     info = stmt.run([updatedUser.name, updatedUser.password, id]);

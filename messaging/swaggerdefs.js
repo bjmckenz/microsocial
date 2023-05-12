@@ -97,6 +97,17 @@ db.exec(`CREATE TABLE IF NOT EXISTS threads (
  *           readonly: false
  *           description: A integer boolean value managing if the reciever has seen the message. By default on object creation, this value is set to false.
  *
+ *     postThread:
+ *       type: object
+ *       required:
+ *         - userGroup
+ *       properties:
+ *         userGroup:
+ *           type: string
+ *           pattern: '^\[\d{1,3},\d{1,3}\]$'
+ *           description: A list of two integers containing the userIds of each user in the thread.
+ *           examples: ["[1,2]"]
+ *           
  *     putMessageContent:
  *       type: object
  *       required:

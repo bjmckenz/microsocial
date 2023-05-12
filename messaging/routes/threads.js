@@ -8,6 +8,7 @@ var express = require('express');
 var router = express.Router();
 module.exports.router = router;
 
+const { validate } = require('../../user/utils/schema-validation')
 const { uri,fetch } = require('../common')
 const {db} = require("../db");
 const {notifyUsersNewMessage,
@@ -47,7 +48,7 @@ router.get("/threads/:user_id", (req, res) => {
   const id = parseInt(req.params.user_id);
 
   const stmt = db.prepare("SELECT id,user_a,user_b FROM threads WHERE user_a=? OR user_b=?");
-  threads = stmt.all([id,id]);
+  threads = stmt.all([id, id]);
 
   if (threads.length < 1) {
     createEvent(
@@ -125,6 +126,7 @@ router.get("/threads/:user_id", (req, res) => {
 router.post("/threads", (req, res) => {
   let thread={};
   let users=req.body.userGroup;
+  validate.postThread(req)
 
   //TODO: Postman sends as string, but /docs sends as object, quick patch, needs attention.
   if(typeof users===typeof ""){

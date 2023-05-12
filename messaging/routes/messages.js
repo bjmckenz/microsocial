@@ -9,9 +9,11 @@ var bleach = require('bleach');
 var router = express.Router();
 module.exports.router = router;
 
+const { validate } = require('../../user/utils/schema-validation')
 const {uri} = require("../common");
 const {db} = require("../db");
 const {notifyUsersNewMessage, createEvent} = require('../service_calls');
+//const {getUserMessages} = require("../pageMessages");
 
 /**
  * @swagger
@@ -64,7 +66,7 @@ const {notifyUsersNewMessage, createEvent} = require('../service_calls');
  */
 router.get("/messages",  (req, res) => {
   //TODO: include dynamic query selection from parameters
-  stmt=db.prepare(`SELECT * FROM messages ORDER BY thread, timestamp`);
+  let stmt=db.prepare(`SELECT * FROM messages ORDER BY thread, timestamp`);
   let messages = stmt.all([]);
 
   if (messages.length < 1) {
@@ -83,6 +85,11 @@ router.get("/messages",  (req, res) => {
   )
 });
 
+function getUserMessages(threadId){
+  const stmt = db.prepare(`SELECT * FROM messages WHERE thread = ? ORDER BY timestamp`);
+  let messageCache = stmt.all([threadId]);
+  return messageCache;
+}
 /**
  * @swagger
  * /messages/{thread_id}:
@@ -143,8 +150,14 @@ router.get("/messages/:thread_id",  (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).end()
     return
   }
-  const stmt = db.prepare(`SELECT * FROM messages WHERE thread = ? ORDER BY timestamp`);
-  let messages = stmt.all([id]);
+
+  //Get cached version
+  /*
+  delStaleMCache()
+  let sesId=getSessionId(id)
+  messages=getUserMCachePage(sesId)
+  */
+  messages = getUserMessages(id)
 
   if (messages.length < 1) {
     createEvent(
@@ -227,7 +240,7 @@ router.post("/messages/:thread_id", (req, res) => {
     createEvent(
       type="Messages => PostNewMessageByThreadId",
       severity="medium",
-      message=`Attempted to post to non-existent thread threadId=${id}`
+      message=`Attempted to post to non-existent thread threadId=${message.thread}`
     )
     res.statusMessage="Thread does not exist"
     res.status(StatusCodes.NOT_FOUND).end()
@@ -241,7 +254,7 @@ router.post("/messages/:thread_id", (req, res) => {
     createEvent(
       type="Messages => PostNewMessageByThreadId",
       severity="medium",
-      message=`Attempted to post to threadId=${id}, even though ${message.author} is not a member.`
+      message=`Attempted to post to threadId=${message.thread}, even though ${message.author} is not a member.`
     )
     console.log("You are not in this thread")
     res.statusMessage="You are not in this thread"
@@ -257,7 +270,7 @@ router.post("/messages/:thread_id", (req, res) => {
     createEvent(
       type="Messages => PostNewMessageByThreadId",
       severity="medium",
-      message=`Attempted to post to threadId=${id} and failed: ${err}`
+      message=`Attempted to post to threadId=${message.thread} and failed: ${err}`
     )
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
     return;

@@ -169,10 +169,15 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
-
+ *         phone_number:
+ *           type: string
+ *           minLength: 10
+ *           
+ *           description: Phone number that relates to the user. No need to be unique, since a user may register multiple accounts.
+ *            
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
- *         ]
+ *         { name: "alonzo", password: "lambda", phone_number: "909-999-9999" }
+ *       ]
  * 
  *     PatchingUser:
  *       type: object
@@ -188,8 +193,14 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+*         phone_number:
+ *           type: string
+ *           minLength: 10
+ *           
+ *           description: Phone number that relates to the user. No need to be unique, since a user may register multiple accounts.
+ *            
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", phone_number: "909-999-9999" }
  *       ]
  *
   *     UserFilteringSpec:

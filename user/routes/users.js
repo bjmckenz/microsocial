@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,phone_number,versionkey ` +
+    `id,name,phone_number,status,created,versionkey ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -336,7 +336,10 @@ function respond_directly_with_query (req, res) {
   row_count = users.length
 
   // post-process users...
-  users.forEach((user) => {
+  users.forEach((user) => {   
+    const status = user.status
+    delete user.status
+    user.status = status ==0 ? "disabled":"active"
     user.uri = USERS_SERVICE(`/user/${user.id}`)
   })
 
@@ -592,11 +595,14 @@ router.post('/users', (req, res) => {
     return
   }
 
-  const stmt = db.prepare(`INSERT INTO users (name, password, phone_number)
-                 VALUES (?, ?, ?)`)
+  const stmt = db.prepare(`INSERT INTO users (name, password, phone_number, status)
+                 VALUES (?, ?, ?, ?)`)
 
   try {
-    info = stmt.run([user.name, user.password, user.phone_number])
+    if(user.status == null){
+      user.status = 1
+    }
+    info = stmt.run([user.name, user.password, user.phone_number, user.status])
   } catch (err) {
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       log_event({
@@ -612,7 +618,7 @@ router.post('/users', (req, res) => {
     log_event({
       severity: 'Low',
       type: 'CannotCreateUser',
-      message: `Create ${[ser.name, user.password]} failed: ${err}`
+      message: `Create ${[user.name, user.password]} failed: ${err}`
     })
     console.log('insert error: ', { err, info, user })
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end()
@@ -623,6 +629,9 @@ router.post('/users', (req, res) => {
   user.id = info.lastInsertRowid
   user.uri = USERS_SERVICE(`/user/${user.id}`)
   delete user.password
+  const status = user.status
+  delete user.status
+  user.status = status == 0 ? "disabled" :"active"
 
   log_event({
     severity: 'Low',

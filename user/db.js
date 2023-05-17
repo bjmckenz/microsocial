@@ -25,6 +25,11 @@ db.exec(`CREATE TABLE IF NOT EXISTS refresh_tokens (
         issued TEXT,
         expires TEXT
     )`)
+db.exec(`CREATE TABLE IF NOT EXISTS user_tou (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        version TEXT
+    )`)
 
 // I have no idea why I had to do this. The get() is NOT defined in my DB for some reason. This polyfills it. BJM 4/15/23
 db.get = (stmt, params) => {

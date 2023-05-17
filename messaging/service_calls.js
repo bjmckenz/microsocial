@@ -95,7 +95,6 @@ async function getUserInfo(userId) {
     return userInfo
 }
 
-//TODO: Identify directions of new Thread Status user -> other users
 async function notifyUsersNewThread(threadMembers) {
   for(let person in threadMembers){
     let recipient=await getUserInfo(threadMembers[person]);

@@ -42,13 +42,18 @@
  *           minLength: 4
  *           format: password
  *           description: No leading or trailing spaces. Never returned by an API.
+ *         lastlogin:
+ *          type: string
+ *          format: date-time
+ *          readOnly: true
+ *          description: Date and time of the user's last login that was successful. Null indicates the user never logged in.
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", password: "lambda", lastlogin: "2023-05-16 21:21:09", uri: "http://lh:8/user/14" }
  *       ]
  * 
  *     LoginInfo:
@@ -119,13 +124,40 @@
  *           maxLength: 32
  *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
  *           description: Name that they log in with. Must be unique
+ *         lastlogin:
+ *           type: string
+ *           format: date-time
+ *           description: Date and time of the user's last login that was successful. Null indicates the user never logged in.
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by endpoint at creation.
  *       examples: [
- *         { id: 1, name: "alonzo", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", lastlogin: "2023-05-16 21:21:09", uri: "http://lh:8/user/14" }
+ *       ]
+ * 
+ *     RetrievedUserActivity:
+ *       type: object
+ *       summary: User schema submitted when updating.
+ *       properties:
+ *         id:
+ *           type: integer
+ *           minimum: 1
+ *           readOnly: true
+ *           description: The auto-generated id of the book. Will be unique.
+ *         name:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 32
+ *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
+ *           description: Name that they log in with. Must be unique
+ *         lastlogin:
+ *           type: string
+ *           format: date-time
+ *           description: Date and time of the user's last login that was successful. Null indicates the user never logged in.
+ *       examples: [
+ *         { id: 1, name: "alonzo", lastlogin: "2023-05-16 21:21:09" }
  *       ]
  * 
  * 

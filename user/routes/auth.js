@@ -22,6 +22,12 @@ module.exports.appSetCallback = function (theApp) {
 }
 module.exports.router = router
 
+// update last login field for a user to datetime('now')
+function updateLastLogin(user_id){
+  const updateDate = db.prepare(`UPDATE users SET lastlogin=datetime('now') WHERE id=?`)
+  updateDate.run([user_id])
+}
+
 function generateAccessToken (payload) {
   const theToken = jsonwebtoken.sign(payload, process.env.TOKEN_SECRET, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRATION
@@ -274,6 +280,7 @@ router.post('/auth/login', async (req, res) => {
 
   deleteRefreshTokensByUser(logged_in_user.id)
   console.log('Successful login', { logged_in_user })
+  updateLastLogin(logged_in_user.id)
 
   log_event({
     severity: 'Low',

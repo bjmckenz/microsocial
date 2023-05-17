@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,lastlogin ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -499,8 +499,7 @@ function are_params_valid (req, res) {
  */
 router.get('/users', async (req, res) => {
   // FIXME: arguably we should just do this perodically, but this is easier for now
-  deleteExpiredResultSets()
-
+  //deleteExpiredResultSets()
   adjust_params_for_validation(req)
   if (!are_params_valid(req, res)) {
     return
@@ -635,3 +634,72 @@ router.post('/users', (req, res) => {
   res.json(user)
   res.status(StatusCodes.CREATED)
 })
+
+/**
+ * @swagger
+ * /users/active:
+ *   get:
+ *     summary: Get Active Users
+ *     description: Get users that have logged in within the week.
+ *     operationId: GetActiveUsers
+ *     tags: [Users API]
+ *     responses:
+ *       200:
+ *         description: List of users that have logged in within the week.
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: array
+ *                items:
+ *                   $ref: '#/components/schemas/RetrievedUserActivity'
+ */
+router.get('/users/active', (req, res) => {
+  const stmt = db.prepare(`SELECT id,name,lastlogin FROM users WHERE lastlogin > datetime('now', '-7 days')`);
+  res.json(stmt.all());
+});
+
+/**
+ * @swagger
+ * /users/inactive:
+ *   get:
+ *     summary: Get Inactive Users
+ *     description: Get users that have not logged in for more than a month.
+ *     operationId: GetInactiveUsers
+ *     tags: [Users API]
+ *     responses:
+ *       200:
+ *         description: List of users that have not logged in within the month.
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: array
+ *                items:
+ *                   $ref: '#/components/schemas/RetrievedUserActivity'
+ */
+router.get('/users/inactive', (req, res) => {
+  const stmt = db.prepare(`SELECT id,name,lastlogin FROM users WHERE lastlogin < datetime('now', '-1 months') OR lastlogin IS NULL`);
+  res.json(stmt.all());
+});
+
+/**
+ * @swagger
+ * /users/today:
+ *   get:
+ *     summary: Get Today's Users
+ *     description: Get users that have logged in today.
+ *     operationId: GetTodayUsers
+ *     tags: [Users API]
+ *     responses:
+ *       200:
+ *         description: List of users that have logged in today.
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: array
+ *                items:
+ *                   $ref: '#/components/schemas/RetrievedUserActivity'
+ */
+router.get('/users/today', (req, res) => {
+  const stmt = db.prepare(`SELECT id,name,lastlogin FROM users WHERE date(lastlogin) = date('now')`);
+  res.json(stmt.all());
+});

@@ -52,6 +52,7 @@ testDropTable()
 // initialize Database
 createDatabase()
 
+// have port listen for client 
 app.listen(PORT, () => {
     console.log(`server started on ${PORT}`)
 })

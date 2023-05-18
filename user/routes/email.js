@@ -8,6 +8,10 @@ const checkEmail = (id) => {
     const result = q.all(id)
     return result
 }
+function validate_email(email) {
+    var email_pattern = /^(?=.{1,32}$)[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,3}$/;
+    return email_pattern.test(email); // check validity, test() returns true or false
+  }
 /*
 email stuff goes here
 prompt:
@@ -54,7 +58,7 @@ Scoring:
 router.put('/user/email', (req, res) => {
     const { id, email } = req.body
 
-    if (!id || !email) {
+    if (!id || !validate_email(email)) {
         res.status(400).json({ error: "Invalid input data" })
     }
     const userEmail = checkEmail(id)

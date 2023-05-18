@@ -8,6 +8,10 @@ const checkCountry = (id) => {
     const result = q.all(id)
     return result
 }
+function validate_country(country) {
+    var country_pattern = /^(?=.{1,3}?).[A-Za-z]{1,3}$/;
+    return country_pattern.test(country); // check validity, test() returns true or false
+  }
 /*
 country stuff goes here
 prompt:
@@ -54,7 +58,7 @@ Scoring:
 router.put('/user/country', (req, res) => {
     const { id, country } = req.body
 
-    if (!id || !country) {
+    if (!id || !validate_country(country)) {
         res.status(400).json({ error: "Invalid input data" })
     }
     const userCountry = checkCountry(id)

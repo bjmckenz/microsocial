@@ -183,11 +183,11 @@ function create_new_result_set (req, session_id) {
     `INSERT INTO users_result_sets ` +
     `(set_querying_user_id, set_results_as_of, set_session_id, ` +
     `set_rownum, ` +
-    `id, name, versionkey) ` +
+    `id, name, versionkey, email, country, tou) ` +
     `SELECT ` +
-    `?,?,?,` +
+    `?,?,?,?,?,?` +
     `ROW_NUMBER() OVER (ORDER BY ${sort_clause}),` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,email,country,tou ` +
     `FROM ` +
     `users` +
     where_clause
@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,email,country,tou ` +
     `FROM ` +
     `users` +
     where_clause +

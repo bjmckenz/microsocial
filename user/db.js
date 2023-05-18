@@ -6,6 +6,8 @@ db.exec(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE COLLATE NOCASE,
         password TEXT NOT NULL,
+        email TEXT UNIQUE NOCASE,
+        country TEXT NOCASE,
         tou INTEGER DEFAULT NULL,
         versionkey INTEGER NOT NULL DEFAULT 1
     );`)
@@ -17,6 +19,9 @@ db.exec(`CREATE TABLE IF NOT EXISTS users_result_sets (
         set_rownum INTEGER,
         id INTEGER,
         name TEXT,
+        email TEXT,
+        country TEXT,
+        tou INTEGER,
         versionkey INTEGER 
     );`)
 db.exec(`CREATE TABLE IF NOT EXISTS refresh_tokens (

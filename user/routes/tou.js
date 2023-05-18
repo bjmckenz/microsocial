@@ -3,9 +3,9 @@ var router = express.Router();
 module.exports.router = router;
 var { db } = require('../db')
 
-const checkVersion = (user_id) => {
-    const q = db.prepare('SELECT * FROM user_tou WHERE user_id=?;')
-    const result = q.all(user_id)
+const checkVersion = (id) => {
+    const q = db.prepare('SELECT tou FROM users WHERE id=?;')
+    const result = q.all(id)
     return result
 }
 
@@ -41,9 +41,9 @@ Scoring:
  * @swagger
  * /user/tou/{id}:
  *  put:
- *      summary:
- *      description:
- *      operationID:
+ *      summary: Update users most recent TOU
+ *      description: Update users.db to show most recent TOU accepted, int only
+ *      operationID: PutTOU
  *      tags: [Users API]
  *      responses:
  *       200:

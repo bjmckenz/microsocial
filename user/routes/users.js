@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,email ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -592,27 +592,53 @@ router.post('/users', (req, res) => {
     return
   }
 
-  const stmt = db.prepare(`INSERT INTO users (name, password)
-                 VALUES (?, ?)`)
-
+  const stmt = db.prepare(`INSERT INTO users (name, password, email)
+                 VALUES (?, ?, ?)`)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  
   try {
-    info = stmt.run([user.name, user.password])
+    if(!emailRegex.test(user.email)) {
+      throw new Error('Invalid email format')
+    }
+    info = stmt.run([user.name, user.password, user.email])
   } catch (err) {
-    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+    if(err.message ==='Invalid email format') {
+      log_event({
+        severity: 'Low',
+        type: 'InvalidEmailFormat',
+        message: `Incorrect email format: ${user.email}`
+      })
+
+      res.statusMessage = 'Incorrect email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if ((err.code === 'SQLITE_CONSTRAINT_UNIQUE') && (err.message.includes('name'))) {
       log_event({
         severity: 'Low',
         type: 'NonUniqueNameCreateRequest',
         message: `Create Request for (existing) User ${user.name} received.`
       })
 
-      res.statusMessage = 'Account already exists'
+      res.statusMessage = 'Account with this name already exists'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if ((err.code === 'SQLITE_CONSTRAINT_UNIQUE') && (err.message.includes('email'))) {
+      log_event({
+        severity: 'Low',
+        type: 'NonUniqueEmailCreateRequest',
+        message: `Create Request for (existing) Email ${user.email} received.`
+      })
+
+      res.statusMessage = 'Account with this email already exists'
       res.status(StatusCodes.BAD_REQUEST).end()
       return
     }
     log_event({
       severity: 'Low',
       type: 'CannotCreateUser',
-      message: `Create ${[ser.name, user.password]} failed: ${err}`
+      message: `Create ${[user.name, user.password, user.email]} failed: ${err}`
     })
     console.log('insert error: ', { err, info, user })
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end()

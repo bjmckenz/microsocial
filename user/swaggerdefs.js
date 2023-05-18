@@ -42,13 +42,20 @@
  *           minLength: 4
  *           format: password
  *           description: No leading or trailing spaces. Never returned by an API.
+ *         last_version_accepted:
+ *           type: integer
+ *           minimum: 1
+ *           description: Indicates last version of terms of use user has accepted.
+ *         country_residence:
+ *           type: string
+ *           description: Country user is from. Default is 'United States'
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", password: "lambda", last_version_accepted: 3, country_residence: "Canada", uri: "http://lh:8/user/14" }
  *       ]
  * 
  *     LoginInfo:
@@ -119,13 +126,20 @@
  *           maxLength: 32
  *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
  *           description: Name that they log in with. Must be unique
+ *         last_version_accepted:
+ *           type: integer
+ *           minimum: 1
+ *           description: Indicates last version of terms of use user has accepted.
+ *         country_residence:
+ *           type: string
+ *           description: Country user is from. Default is 'United States'
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by endpoint at creation.
  *       examples: [
- *         { id: 1, name: "alonzo", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", last_version_accepted: 3, country_residence: "Canada", uri: "http://lh:8/user/14" }
  *       ]
  * 
  * 
@@ -146,8 +160,15 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         last_version_accepted:
+ *           type: integer
+ *           minimum: 1
+ *           description: Indicates last version of terms of use user has accepted.
+ *         country_residence:
+ *           type: string
+ *           description: Country user is from. Default is 'United States'
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", last_version_accepted: 3, country_residence: "Canada" }
  *       ]
  * 
  * 
@@ -157,6 +178,8 @@
  *       required:
  *         - name
  *         - password
+ *         - last_version_accepted
+ *         - country_residence
  *       properties:
  *         name:
  *           type: string
@@ -169,10 +192,18 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
-
+ *         last_version_accepted:
+ *           type: integer
+ *           minimum: 1
+ *           description: Indicates last version of terms of use user has accepted.
+ *         country_residence:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 32
+ *           description: Country user is from. Default is 'United States'
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
- *         ]
+ *         { name: "alonzo", password: "lambda", last_version_accepted: 3, country_residence: "Canada" }
+ *       ]
  * 
  *     PatchingUser:
  *       type: object
@@ -188,8 +219,15 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         last_version_accepted:
+ *           type: integer
+ *           minimum: 1
+ *           description: Indicates last version of terms of use user has accepted.
+ *         country_residence:
+ *           type: string
+ *           description: Country user is from. Default is 'United States'
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", last_version_accepted: 3, country_residence: "Canada" }
  *       ]
  *
   *     UserFilteringSpec:
@@ -252,4 +290,3 @@
  *          //$ref: '#/components/schemas/UserSortingOption'
  * 
  */
- 

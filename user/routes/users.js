@@ -183,11 +183,11 @@ function create_new_result_set (req, session_id) {
     `INSERT INTO users_result_sets ` +
     `(set_querying_user_id, set_results_as_of, set_session_id, ` +
     `set_rownum, ` +
-    `id, name, versionkey) ` +
+    `id, name, versionkey, last_version_accepted, country_residence) ` +
     `SELECT ` +
     `?,?,?,` +
     `ROW_NUMBER() OVER (ORDER BY ${sort_clause}),` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,last_version_accepted,country_residence ` +
     `FROM ` +
     `users` +
     where_clause
@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,last_version_accepted,country_residence ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -375,7 +375,7 @@ function respond_from_existing_result_set (req, res, session_id) {
   //console.log({ requested_ranges })
 
   // pull from results, not fresh query
-  const get_users_from_set = `SELECT id, name, versionkey, set_rownum FROM users_result_sets WHERE set_session_id = ? ORDER BY set_rownum LIMIT ? OFFSET ?`
+  const get_users_from_set = `SELECT id, name, versionkey, last_version_accepted, country_residence, set_rownum FROM users_result_sets WHERE set_session_id = ? ORDER BY set_rownum LIMIT ? OFFSET ?`
   const get_users_from_set_stmt = db.prepare(get_users_from_set)
 
   users = []
@@ -569,6 +569,8 @@ router.get('/users', async (req, res) => {
  *          description: User data is not acceptable
  *          examples: [ "Invalid user name",
  *                "Invalid password",
+ *                "Invalid last_version_accepted",
+ *                "Invalid country_residence",
  *                "User with that name already exists" ]
  */
 router.post('/users', (req, res) => {
@@ -592,11 +594,11 @@ router.post('/users', (req, res) => {
     return
   }
 
-  const stmt = db.prepare(`INSERT INTO users (name, password)
-                 VALUES (?, ?)`)
+  const stmt = db.prepare(`INSERT INTO users (name, password, last_version_accepted, country_residence)
+                 VALUES (?, ?, ?, ?)`)
 
   try {
-    info = stmt.run([user.name, user.password])
+    info = stmt.run([user.name, user.password, user.last_version_accepted, user.country_residence])
   } catch (err) {
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       log_event({
@@ -612,7 +614,7 @@ router.post('/users', (req, res) => {
     log_event({
       severity: 'Low',
       type: 'CannotCreateUser',
-      message: `Create ${[ser.name, user.password]} failed: ${err}`
+      message: `Create ${[user.name, user.password, user.last_version_accepted, user.country_residence]} failed: ${err}`
     })
     console.log('insert error: ', { err, info, user })
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end()

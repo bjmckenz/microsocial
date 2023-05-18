@@ -6,8 +6,13 @@ db.exec(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE COLLATE NOCASE,
         password TEXT NOT NULL,
-        versionkey INTEGER NOT NULL DEFAULT 1
+        versionkey INTEGER NOT NULL DEFAULT 1,
+        last_version_accepted INTEGER,
+        country_residence TEXT NOT NULL DEFAULT 'United States'
     );`)
+
+// db.exec('ALTER TABLE IF EXISTS users ( ADD last_version_accepted INTEGER );')
+
 db.exec(`CREATE TABLE IF NOT EXISTS users_result_sets (
         set_id INTEGER PRIMARY KEY AUTOINCREMENT,
         set_session_id TEXT,
@@ -16,7 +21,8 @@ db.exec(`CREATE TABLE IF NOT EXISTS users_result_sets (
         set_rownum INTEGER,
         id INTEGER,
         name TEXT,
-        versionkey INTEGER 
+        versionkey INTEGER,
+        last_version_accepted INTEGER
     );`)
 db.exec(`CREATE TABLE IF NOT EXISTS refresh_tokens (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

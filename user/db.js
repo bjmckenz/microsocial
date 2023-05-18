@@ -6,6 +6,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE COLLATE NOCASE,
         password TEXT NOT NULL,
+        tou INTEGER DEFAULT NULL,
         versionkey INTEGER NOT NULL DEFAULT 1
     );`)
 db.exec(`CREATE TABLE IF NOT EXISTS users_result_sets (
@@ -24,13 +25,8 @@ db.exec(`CREATE TABLE IF NOT EXISTS refresh_tokens (
         refresh_token TEXT NOT NULL, 
         issued TEXT,
         expires TEXT
-    )`)
-db.exec(`CREATE TABLE IF NOT EXISTS user_tou (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL UNIQUE,
-        version TEXT
-    )`)
-// I have no idea why I had to do this. The get() is NOT defined in my DB for some reason. This polyfills it. BJM 4/15/23
+    )`)  
+// I have no idea why I had to do this. The get() is NOT defined in my DB for some reason. This polyfills it. BJM 4/15/23 - hi bruce. Dylan & Duck 5/17/23
 db.get = (stmt, params) => {
   prep = db.prepare(stmt)
   results = prep.all(params)

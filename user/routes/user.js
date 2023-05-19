@@ -56,7 +56,8 @@ router.get("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare("SELECT id,name FROM users where id = ?");
+  // added country
+  const stmt = db.prepare("SELECT id,name, country FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {
@@ -140,10 +141,12 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
+  // added country
+  const stmt = db.prepare(`UPDATE users SET name=?, password=?, country=? WHERE id=?`);
 
   try {
-    info = stmt.run([updatedUser.name, updatedUser.password, id]);
+    //added updatedUser.country
+    info = stmt.run([updatedUser.name, updatedUser.password, updatedUser.country, id]);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
@@ -254,8 +257,15 @@ router.patch("/user/:id", (req, res) => {
       updateParams.push(updatedUser.password);
     }
 
+    // update country (of residence)
+    if ("country" in updatedUser) {
+      updateClauses.push("country = ?");
+      updateParams.push(updatedUser.country);
+    }
+
     const stmt = db.prepare(
-      `UPDATE users SET ${updateClauses.join(", ")} WHERE id=?`
+      //added country
+      `UPDATE users SET ${updateClauses.join(", ")}, country=? WHERE id=?`
     );
 
     info = stmt.run([...updateParams, id]);

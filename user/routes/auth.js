@@ -90,10 +90,14 @@ function deleteRefreshTokenById (token_id) {
   delete_token_stmt.run(token_id)
 }
 
-function getUserByNameAndPassword (user_name, user_pass) {
+function getUserByNameAndPassword (user_name, user_pass, filterActiveAccount=false) {
   const getUserSql =
     'SELECT id, name FROM users WHERE name = ? AND password = ?'
-  user = db.get(getUserSql, [user_name, user_pass])
+  if(!filterActiveAccount){
+    user = db.get(getUserSql, [user_name, user_pass])
+  }else{
+    user = db.get(getUserSql+' AND accountstatus = 1', [user_name, user_pass])
+  }
   return user
 }
 
@@ -257,9 +261,10 @@ router.post('/auth/login', async (req, res) => {
     })
   }
 
+  // Optional toggle filterActiveAccount=true asserts that the account must be active to login.
   logged_in_user = getUserByNameAndPassword(
     login_info.name,
-    login_info.password
+    login_info.password,
   )
 
   if (logged_in_user === undefined) {
@@ -281,6 +286,18 @@ router.post('/auth/login', async (req, res) => {
       message: `User ${logged_in_user.id} '${logged_in_user.name}' logged in from ${req.socket.remoteAddress}`
     })
 
+  try{
+    const newlastlogin = db.prepare(`UPDATE users SET lastlogin=? WHERE id=?`)
+    newlastlogin.run([Date.now(),logged_in_user.id])
+  }
+  catch(err){
+    console.log(err)
+    log_event({
+      severity: 'Med',
+      type: 'Login',
+      message: `Failed to update User ${logged_in_user.id} lastlogin field`
+    })
+  }
   const access_token = generateAccessToken({
     client_id: logged_in_user.id,
     session: uuidv4()

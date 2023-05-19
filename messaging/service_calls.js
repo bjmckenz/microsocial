@@ -122,6 +122,7 @@ async function notifyUsersNewThread(threadMembers) {
     }
   }
 }
+
 async function notifyUsersNewMessage(threadMembers,message,action) {
   let authname = await getUserInfo(message.author);
   for(let person in threadMembers){

@@ -10,8 +10,8 @@ var express = require("express");
 var router = express.Router();
 module.exports.router = router;
 
-const { USERS_SERVICE } = require("../common");
-const { db } = require("../db");
+const { USERS_SERVICE, log_event } = require("../common");
+const { db, typeConvertAndFill } = require("../db");
 const { validate } = require("../utils/schema-validation");
 
 /**
@@ -56,7 +56,7 @@ router.get("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare("SELECT id,name FROM users where id = ?");
+  const stmt = db.prepare("SELECT id,name,datecreated,accountstatus,lastlogin,emailaddress,touversion,country,passhint,phonenumber,twofactormethod,recoveryemail FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {
@@ -112,6 +112,8 @@ router.get("/user/:id", (req, res) => {
 router.put("/user/:id", (req, res) => {
   const id = parseInt(req.params.id);
 
+  const updatedUser = typeConvertAndFill(req.body);
+
   errors = validate.UserId(id, "{id}");
   if (errors.length) {
     log_event({
@@ -124,8 +126,6 @@ router.put("/user/:id", (req, res) => {
     res.status(StatusCodes.NOT_FOUND).end();
     return;
   }
-
-  const updatedUser = req.body;
 
   errors = validate.UpdatingUser(updatedUser, "{body}");
   if (errors.length) {
@@ -140,17 +140,29 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
-
+  const stmt = db.prepare(`UPDATE users SET name=?, password=?, accountstatus=?, emailaddress=?, touversion=?, country=?, passhint=?, phonenumber=?, twofactormethod=?, recoveryemail=? WHERE id=?`);
+  let info={}
   try {
-    info = stmt.run([updatedUser.name, updatedUser.password, id]);
+    info = stmt.run([
+        updatedUser.name,
+        updatedUser.password,
+        updatedUser.accountstatus,
+        updatedUser.emailaddress,
+        updatedUser.touversion,
+        updatedUser.country,
+        updatedUser.passhint,
+        updatedUser.phonenumber,
+        updatedUser.twofactormethod,
+        updatedUser.recoveryemail,
+        id
+    ]);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
         type: 'InvalidUserUpdate2',
         message: `Update for User ${id} failed.`
       })
-      console.log("update error1: ", { err, info, user });
+      console.log("update error1: ", { err, info, updatedUser });
       res.statusMessage = "Account update failed.";
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
@@ -161,12 +173,17 @@ router.put("/user/:id", (req, res) => {
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
     }
+    if (err.code === "SQLITE_CONSTRAINT_CHECK") {
+      res.statusMessage = "New emailaddress is the same as recoveryemail or passhint is the same as password";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
     log_event({
       severity: 'Low',
       type: 'InvalidUserUpdate3',
       message: `Update for User ${id} failed: ${JSON.stringify(err)}`
     })
-    console.log("update error2: ", { err, info, user });
+    console.log("update error2: ", { err, info, updatedUser });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
     return;
   }
@@ -211,6 +228,8 @@ router.put("/user/:id", (req, res) => {
 router.patch("/user/:id", (req, res) => {
   const id = parseInt(req.params.id);
 
+  const updatedUser = typeConvertAndFill(req.body);
+
   errors = validate.UserId(id, "{id}");
   if (errors.length) {
     log_event({
@@ -223,8 +242,6 @@ router.patch("/user/:id", (req, res) => {
     res.status(StatusCodes.NOT_FOUND).end();
     return;
   }
-
-  const updatedUser = req.body;
 
   errors = validate.PatchingUser(updatedUser, "{body}");
   if (errors.length) {
@@ -240,20 +257,30 @@ router.patch("/user/:id", (req, res) => {
   }
 
   var info;
+  const paramSet=[
+    "name",
+    "password",
+    "accountstatus",
+    "emailaddress",
+    "touversion",
+    "country",
+    "passhint",
+    "phonenumber",
+    "twofactormethod",
+    "recoveryemail"
+  ]
   try {
     updateClauses = [];
     updateParams = [];
-
-    if ("name" in updatedUser) {
-      updateClauses.push("name = ?");
-      updateParams.push(updatedUser.name);
+ 
+    for(param in paramSet){
+      if(!param){break;}
+      let targetParam=paramSet[param];
+      if(targetParam in updatedUser){
+        updateClauses.push(targetParam+` = ?`);
+        updateParams.push(updatedUser[targetParam]);
+      }
     }
-
-    if ("password" in updatedUser) {
-      updateClauses.push("password = ?");
-      updateParams.push(updatedUser.password);
-    }
-
     const stmt = db.prepare(
       `UPDATE users SET ${updateClauses.join(", ")} WHERE id=?`
     );
@@ -272,6 +299,11 @@ router.patch("/user/:id", (req, res) => {
   } catch (err) {
     if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
       res.statusMessage = "Account with name already exists";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+    if (err.code === "SQLITE_CONSTRAINT_CHECK") {
+      res.statusMessage = "New emailaddress is the same as recoveryemail or passhint is the same as password";
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
     }

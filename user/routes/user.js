@@ -56,7 +56,7 @@ router.get("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare("SELECT id,name FROM users where id = ?");
+  const stmt = db.prepare("SELECT id,name, creationdate FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {

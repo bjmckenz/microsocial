@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey ` +
+    `id,name,creationdate,versionkey ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -573,10 +573,12 @@ router.get('/users', async (req, res) => {
  */
 router.post('/users', (req, res) => {
   user = req.body
-
+  
+  
   // XML adds an outer wrapper
   while ( 'user' in user ) {
     user = user.user;
+    
   }
 
   errors = validate.CreatingUser(user, '{body}')
@@ -591,12 +593,12 @@ router.post('/users', (req, res) => {
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).end()
     return
   }
-
-  const stmt = db.prepare(`INSERT INTO users (name, password)
-                 VALUES (?, ?)`)
+  const creationdate = new Date().toISOString();
+  const stmt = db.prepare(`INSERT INTO users (name, password, creationdate)
+                 VALUES (?, ?, ?)`)
 
   try {
-    info = stmt.run([user.name, user.password])
+    info = stmt.run([user.name, user.password, creationdate])
   } catch (err) {
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       log_event({

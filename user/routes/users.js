@@ -12,7 +12,7 @@ var router = express.Router()
 module.exports.router = router
 
 const { USERS_SERVICE, log_event, returnError } = require('../common')
-const { db } = require('../db')
+const { db, typeConvertAndFill } = require('../db')
 const { validate } = require('../utils/schema-validation')
 const { regexpCode } = require('ajv/dist/compile/codegen')
 
@@ -63,9 +63,69 @@ const terms = [
   { term: 'name_GT', clause: 'name > ?' },
   { term: 'name_NE', clause: 'name != ?', inverted: true },
   { term: 'name', clause: 'name = ?', inverted: false },
+  { term: 'name_CONT', clause: 'name LIKE ?'},
   { term: 'name_EQ', clause: 'name = ?', inverted: false },
   { term: 'name_LE', clause: 'name <= ?' },
-  { term: 'name_LT', clause: 'name < ?' }
+  { term: 'name_LT', clause: 'name < ?' },
+  { term: 'datecreated', clause: 'datecreated = ?', type:'int', inverted: false },
+  { term: 'datecreated_NE', clause: 'datecreated = ?', type:'int', inverted: true },
+  { term: 'datecreated_EQ', clause: 'datecreated = ?', type:'int', inverted: false },
+  { term: 'datecreated_LE', clause: 'datecreated <= ?', type:'int' },
+  { term: 'datecreated_LT', clause: 'datecreated < ?', type:'int' },
+  { term: 'datecreated_GE', clause: 'datecreated >= ?', type:'int' },
+  { term: 'datecreated_GT', clause: 'datecreated > ?', type:'int' },
+  { term: 'accountstatus', clause: 'accountstatus = ?', type:'int', inverted: false },
+  { term: 'lastlogin', clause: 'datecreated = ?', type:'int', inverted: false },
+  { term: 'lastlogin_NE', clause: 'lastlogin = ?', type:'int', inverted: true },
+  { term: 'lastlogin_EQ', clause: 'lastlogin = ?', type:'int', inverted: false },
+  { term: 'lastlogin_LE', clause: 'lastlogin <= ?', type:'int' },
+  { term: 'lastlogin_LT', clause: 'lastlogin < ?', type:'int' },
+  { term: 'lastlogin_GE', clause: 'lastlogin >= ?', type:'int' },
+  { term: 'lastlogin_GT', clause: 'lastlogin > ?', type:'int' },
+  { term: 'emailaddress', clause: 'emailaddress = ?', inverted: false },
+  { term: 'emailaddress_CONT', clause: 'emailaddress LIKE ?'}, 
+  { term: 'emailaddress_GE', clause: 'emailaddress >= ?' },
+  { term: 'emailaddress_GT', clause: 'emailaddress > ?' },
+  { term: 'emailaddress_NE', clause: 'emailaddress != ?', inverted: true },
+  { term: 'emailaddress_EQ', clause: 'emailaddress = ?', inverted: false },
+  { term: 'emailaddress_LE', clause: 'emailaddress <= ?' },
+  { term: 'emailaddress_LT', clause: 'emailaddress < ?' },
+  { term: 'country', clause: 'country = ?', inverted: false },
+  { term: 'country_CONT', clause: 'country LIKE ?', inverted: false },
+  { term: 'touversion', clause: 'touversioned = ?', type:'int', inverted: false },
+  { term: 'touversion_NE', clause: 'touversion = ?', type:'int', inverted: true },
+  { term: 'touversion_EQ', clause: 'touversion = ?', type:'int', inverted: false },
+  { term: 'touversion_LE', clause: 'touversion <= ?', type:'int' },
+  { term: 'touversion_LT', clause: 'touversion < ?', type:'int' },
+  { term: 'touversion_GE', clause: 'touversion >= ?', type:'int' },
+  { term: 'touversion_GT', clause: 'touversion > ?', type:'int' },
+  /* Queries based on passhint don't make sense as they're pseudo privleged
+   * We probably shouldn't return them at all except in conditional access.
+  { term: '', clause: ' = ?', inverted: false },
+  { term: '_CONT', clause: ' LIKE ?'},
+  { term: '_GE', clause: ' >= ?' },
+  { term: '_GT', clause: ' > ?' },
+  { term: '_NE', clause: ' != ?', inverted: true },
+  { term: '_EQ', clause: ' = ?', inverted: false },
+  { term: '_LE', clause: ' <= ?' },
+  { term: '_LT', clause: ' < ?' },
+  */
+  { term: 'phonenumber', clause: 'phonenumber = ?', inverted: false },
+  { term: 'phonenumber_GE', clause: 'phonenumber >= ?' },
+  { term: 'phonenumber_GT', clause: 'phonenumber > ?' },
+  { term: 'phonenumber_NE', clause: 'phonenumber != ?', inverted: true },
+  { term: 'phonenumber_EQ', clause: 'phonenumber = ?', inverted: false },
+  { term: 'phonenumber_LE', clause: 'phonenumber <= ?' },
+  { term: 'phonenumber_LT', clause: 'phonenumber < ?' },
+  { term: 'twofactormethod', clause: 'twofactormethod = ?', inverted: false },
+  { term: 'recoveryemail', clause: 'recoveryemail = ?', inverted: false },
+  { term: 'recoveryemail_CONT', clause: 'recoveryemail LIKE ?'}, 
+  { term: 'recoveryemail_GE', clause: 'recoveryemail >= ?' },
+  { term: 'recoveryemail_GT', clause: 'recoveryemail > ?' },
+  { term: 'recoveryemail_NE', clause: 'recoveryemail != ?', inverted: true },
+  { term: 'recoveryemail_EQ', clause: 'recoveryemail = ?', inverted: false },
+  { term: 'recoveryemail_LE', clause: 'recoveryemail <= ?' },
+  { term: 'recoveryemail_LT', clause: 'recoveryemail < ?' }
 ]
 
 // Which of all the *query* (where-clause) terms are present?
@@ -317,7 +377,8 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey,datecreated ` +
+    `id,name,versionkey,datecreated,accountstatus,lastlogin,emailaddress,touversion,` +
+    `country,passhint,phonenumber,twofactormethod,recoveryemail ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -572,15 +633,15 @@ router.get('/users', async (req, res) => {
  *                "User with that name already exists" ]
  */
 router.post('/users', (req, res) => {
-  user = req.body
+  let user = req.body
 
   // XML adds an outer wrapper
   while ( 'user' in user ) {
     user = user.user;
   }
+  user = typeConvertAndFill(req.body);
 
   errors = validate.CreatingUser(user, '{body}')// Seemse to require message, severity
-  console.log(errors)
   if (errors.length) {
     log_event({
       severity: 'Low',

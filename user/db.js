@@ -6,7 +6,10 @@ db.exec(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE COLLATE NOCASE,
         password TEXT NOT NULL,
-        versionkey INTEGER NOT NULL DEFAULT 1
+        versionkey INTEGER NOT NULL DEFAULT 1,
+        email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+        creation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        recovery_email TEXT NULL COLLATE NOCASE
     );`)
 db.exec(`CREATE TABLE IF NOT EXISTS users_result_sets (
         set_id INTEGER PRIMARY KEY AUTOINCREMENT,

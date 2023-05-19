@@ -25,6 +25,8 @@
  *         - id
  *         - name
  *         - password
+ *         - email
+ *         - date
  *       properties:
  *         id:
  *           type: integer
@@ -42,13 +44,31 @@
  *           minLength: 4
  *           format: password
  *           description: No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Email that they registered with. Must be unique
+ *         creation_date:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           readOnly: true
+ *           description: The auto-generated creation time of the User. Does not need to be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com", uri: "http://lh:8/user/14" }
  *       ]
  * 
  *     LoginInfo:
@@ -119,13 +139,31 @@
  *           maxLength: 32
  *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
  *           description: Name that they log in with. Must be unique
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Email that they registered with. Must be unique
+ *         creation_date:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           readOnly: true
+ *           description: The auto-generated creation time of the User. Does not need to be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.   
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by endpoint at creation.
  *       examples: [
- *         { id: 1, name: "alonzo", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", email: "myemail@gmail.com", recovery_email: "reco@email.com", uri: "http://lh:8/user/14" }
  *       ]
  * 
  * 
@@ -134,6 +172,7 @@
  *       required:
  *         - name
  *         - password
+ *         - email
  *       properties:
  *         name:
  *           type: string
@@ -146,8 +185,20 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Email that they registered with. Must be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com"}
  *       ]
  * 
  * 
@@ -157,6 +208,7 @@
  *       required:
  *         - name
  *         - password
+ *         - email
  *       properties:
  *         name:
  *           type: string
@@ -169,9 +221,20 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
-
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Email that they registered with. Must be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com"}
  *         ]
  * 
  *     PatchingUser:
@@ -188,8 +251,20 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Email that they registered with. Must be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com" }
  *       ]
  *
   *     UserFilteringSpec:

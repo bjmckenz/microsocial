@@ -56,7 +56,7 @@ router.get("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare("SELECT id,name FROM users where id = ?");
+  const stmt = db.prepare("SELECT id,name,email,creation_date,recovery_email FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {
@@ -140,10 +140,24 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
+  const stmt = db.prepare(`UPDATE users SET name=?, password=? , email=?, recovery_email=COALESCE(?, recovery_email) WHERE id=?`);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   try {
-    info = stmt.run([updatedUser.name, updatedUser.password, id]);
+    if(!emailRegex.test(updatedUser.email)) {
+      throw new Error('Invalid email format')
+    }
+    if((updatedUser.recovery_email) && (!emailRegex.test(updatedUser.recovery_email))) {
+      throw new Error('Invalid recovery email format')
+    }
+    values = [
+      updatedUser.name,
+      updatedUser.password,
+      updatedUser.email,
+      updatedUser.recovery_email,
+      id,
+    ];
+    info = stmt.run(values);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
@@ -156,8 +170,23 @@ router.put("/user/:id", (req, res) => {
       return;
     }
   } catch (err) {
-    if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
-      res.statusMessage = "Account with name already exists";
+    if(err.message ==='Invalid email format') {
+      res.statusMessage = 'Incorrect email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if(err.message ==='Invalid recovery email format') {
+      res.statusMessage = 'Incorrect recovery email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && (err.message.includes('name'))) {
+      res.statusMessage = "Name is already being used";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && (err.message.includes('email'))) {
+      res.statusMessage = "Email is already being used";
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
     }
@@ -240,6 +269,8 @@ router.patch("/user/:id", (req, res) => {
   }
 
   var info;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   try {
     updateClauses = [];
     updateParams = [];
@@ -252,6 +283,22 @@ router.patch("/user/:id", (req, res) => {
     if ("password" in updatedUser) {
       updateClauses.push("password = ?");
       updateParams.push(updatedUser.password);
+    }
+
+    if ("email" in updatedUser) {
+      if(!emailRegex.test(updatedUser.email)) {
+        throw new Error('Invalid email format')
+      }
+      updateClauses.push("email = ?");
+      updateParams.push(updatedUser.email);
+    }
+
+    if ("recovery_email" in updatedUser) {
+      if((updatedUser.recovery_email) && (!emailRegex.test(updatedUser.recovery_email))) {
+        throw new Error('Invalid recovery email format')
+      }
+      updateClauses.push("recovery_email = ?");
+      updateParams.push(updatedUser.recovery_email);
     }
 
     const stmt = db.prepare(
@@ -270,8 +317,23 @@ router.patch("/user/:id", (req, res) => {
       return;
     }
   } catch (err) {
-    if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    if(err.message ==='Invalid email format') {
+      res.statusMessage = 'Incorrect email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if(err.message ==='Invalid recovery email format') {
+      res.statusMessage = 'Incorrect recovery email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && (err.message.includes('name'))) {
       res.statusMessage = "Account with name already exists";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && (err.message.includes('email'))) {
+      res.statusMessage = "Account with email already exists";
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
     }

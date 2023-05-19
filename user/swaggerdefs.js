@@ -48,6 +48,8 @@
  *           description: Indicates last version of terms of use user has accepted.
  *         country_residence:
  *           type: string
+ *           minLength: 1
+ *           maxLength: 32
  *           description: Country user is from. Default is 'United States'
  *         uri:
  *           type: string
@@ -132,6 +134,8 @@
  *           description: Indicates last version of terms of use user has accepted.
  *         country_residence:
  *           type: string
+ *           minLength: 1
+ *           maxLength: 32
  *           description: Country user is from. Default is 'United States'
  *         uri:
  *           type: string
@@ -148,6 +152,7 @@
  *       required:
  *         - name
  *         - password
+ *         - country_residence
  *       properties:
  *         name:
  *           type: string
@@ -166,6 +171,8 @@
  *           description: Indicates last version of terms of use user has accepted.
  *         country_residence:
  *           type: string
+ *           minLength: 1
+ *           maxLength: 32
  *           description: Country user is from. Default is 'United States'
  *       examples: [
  *         { name: "alonzo", password: "lambda", last_version_accepted: 3, country_residence: "Canada" }
@@ -225,6 +232,8 @@
  *           description: Indicates last version of terms of use user has accepted.
  *         country_residence:
  *           type: string
+ *           minLength: 1
+ *           maxLength: 32
  *           description: Country user is from. Default is 'United States'
  *       examples: [
  *         { name: "alonzo", password: "lambda", last_version_accepted: 3, country_residence: "Canada" }

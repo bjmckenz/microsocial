@@ -350,11 +350,11 @@ router.delete("/user/:id", (req, res) => {
     res.status(StatusCodes.NOT_FOUND).end();
     return;
   }
-  log_event({
-    severity: 'Medium',
-    type: 'DeleteUser',
-    message: `Deleted User ${id}.`
-  })
+  // log_event({
+  //   severity: 'Medium',
+  //   type: 'DeleteUser',
+  //   message: `Deleted User ${id}.`
+  // })
 
   res.status(StatusCodes.NO_CONTENT).end();
 });

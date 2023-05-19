@@ -317,7 +317,7 @@ function respond_directly_with_query (req, res) {
   const sort_clause = sort_clause_SQL(req)
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey,email ` +
+    `id,name,versionkey,email,creation_date,recovery_email ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -592,15 +592,24 @@ router.post('/users', (req, res) => {
     return
   }
 
-  const stmt = db.prepare(`INSERT INTO users (name, password, email)
-                 VALUES (?, ?, ?)`)
+  const stmt = db.prepare(`INSERT INTO users (name, password, email, recovery_email)
+                 VALUES (?, ?, ?, ?)`)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  
+
   try {
     if(!emailRegex.test(user.email)) {
       throw new Error('Invalid email format')
     }
-    info = stmt.run([user.name, user.password, user.email])
+    if((user.recovery_email) && (!emailRegex.test(user.recovery_email))) {
+      throw new Error('Invalid recovery email format')
+    }
+    const values = [
+      user.name,
+      user.password,
+      user.email,
+      user.recovery_email || null,
+    ];
+    info = stmt.run(values)
   } catch (err) {
     if(err.message ==='Invalid email format') {
       log_event({
@@ -610,6 +619,17 @@ router.post('/users', (req, res) => {
       })
 
       res.statusMessage = 'Incorrect email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if(err.message ==='Invalid recovery email format') {
+      log_event({
+        severity: 'Low',
+        type: 'InvalidEmailFormat',
+        message: `Incorrect email format: ${user.email}`
+      })
+
+      res.statusMessage = 'Incorrect recovery email format'
       res.status(StatusCodes.BAD_REQUEST).end()
       return
     }

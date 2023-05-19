@@ -56,7 +56,7 @@ router.get("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare("SELECT id,name,email FROM users where id = ?");
+  const stmt = db.prepare("SELECT id,name,email,creation_date,recovery_email FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {
@@ -140,14 +140,24 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? , email=? WHERE id=?`);
+  const stmt = db.prepare(`UPDATE users SET name=?, password=? , email=?, recovery_email=COALESCE(?, recovery_email) WHERE id=?`);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   try {
     if(!emailRegex.test(updatedUser.email)) {
       throw new Error('Invalid email format')
     }
-    info = stmt.run([updatedUser.name, updatedUser.password, updatedUser.email, id]);
+    if((updatedUser.recovery_email) && (!emailRegex.test(updatedUser.recovery_email))) {
+      throw new Error('Invalid recovery email format')
+    }
+    values = [
+      updatedUser.name,
+      updatedUser.password,
+      updatedUser.email,
+      updatedUser.recovery_email,
+      id,
+    ];
+    info = stmt.run(values);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
@@ -162,6 +172,11 @@ router.put("/user/:id", (req, res) => {
   } catch (err) {
     if(err.message ==='Invalid email format') {
       res.statusMessage = 'Incorrect email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if(err.message ==='Invalid recovery email format') {
+      res.statusMessage = 'Incorrect recovery email format'
       res.status(StatusCodes.BAD_REQUEST).end()
       return
     }
@@ -278,6 +293,14 @@ router.patch("/user/:id", (req, res) => {
       updateParams.push(updatedUser.email);
     }
 
+    if ("recovery_email" in updatedUser) {
+      if((updatedUser.recovery_email) && (!emailRegex.test(updatedUser.recovery_email))) {
+        throw new Error('Invalid recovery email format')
+      }
+      updateClauses.push("recovery_email = ?");
+      updateParams.push(updatedUser.recovery_email);
+    }
+
     const stmt = db.prepare(
       `UPDATE users SET ${updateClauses.join(", ")} WHERE id=?`
     );
@@ -296,6 +319,11 @@ router.patch("/user/:id", (req, res) => {
   } catch (err) {
     if(err.message ==='Invalid email format') {
       res.statusMessage = 'Incorrect email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+    if(err.message ==='Invalid recovery email format') {
+      res.statusMessage = 'Incorrect recovery email format'
       res.status(StatusCodes.BAD_REQUEST).end()
       return
     }

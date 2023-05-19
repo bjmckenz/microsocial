@@ -26,6 +26,7 @@
  *         - name
  *         - password
  *         - email
+ *         - date
  *       properties:
  *         id:
  *           type: integer
@@ -48,14 +49,26 @@
  *           minLength: 1
  *           maxLength: 255
  *           format: email
- *           description: Email that they registered with. Must be unique        
+ *           description: Email that they registered with. Must be unique
+ *         creation_date:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           readOnly: true
+ *           description: The auto-generated creation time of the User. Does not need to be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", email: "myemail@gmail.com", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com", uri: "http://lh:8/user/14" }
  *       ]
  * 
  *     LoginInfo:
@@ -131,14 +144,26 @@
  *           minLength: 1
  *           maxLength: 255
  *           format: email
- *           description: Email that they registered with. Must be unique              
+ *           description: Email that they registered with. Must be unique
+ *         creation_date:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           readOnly: true
+ *           description: The auto-generated creation time of the User. Does not need to be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.   
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by endpoint at creation.
  *       examples: [
- *         { id: 1, name: "alonzo", email: "myemail@gmail.com", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", email: "myemail@gmail.com", recovery_email: "reco@email.com", uri: "http://lh:8/user/14" }
  *       ]
  * 
  * 
@@ -165,9 +190,15 @@
  *           minLength: 1
  *           maxLength: 255
  *           format: email
- *           description: Email that they registered with. Must be unique  
+ *           description: Email that they registered with. Must be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *       examples: [
- *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com" }
+ *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com"}
  *       ]
  * 
  * 
@@ -195,9 +226,15 @@
  *           minLength: 1
  *           maxLength: 255
  *           format: email
- *           description: Email that they registered with. Must be unique 
+ *           description: Email that they registered with. Must be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *       examples: [
- *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com" }
+ *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com"}
  *         ]
  * 
  *     PatchingUser:
@@ -219,9 +256,15 @@
  *           minLength: 1
  *           maxLength: 255
  *           format: email
- *           description: Email that they registered with. Must be unique 
+ *           description: Email that they registered with. Must be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           format: email
+ *           description: Recovery email. Not unique, and not required.
  *       examples: [
- *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com" }
+ *         { name: "alonzo", password: "lambda", email: "myemail@gmail.com", recovery_email: "reco@email.com" }
  *       ]
  *
   *     UserFilteringSpec:

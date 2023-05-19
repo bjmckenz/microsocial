@@ -47,6 +47,12 @@
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
+ *         creationdate:
+ *           type: string
+ *           minimum: 1
+ *           format: date-time
+ *           readOnly: true
+ *           description: Time account created.
  *       examples: [
  *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
  *       ]
@@ -146,6 +152,12 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         creationdate:
+ *           type: string
+ *           minimum: 1
+ *           format: date-time
+ *           readOnly: true
+ *           description: Time account created.
  *       examples: [
  *         { name: "alonzo", password: "lambda" }
  *       ]

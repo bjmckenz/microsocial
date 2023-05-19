@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { db } = require("./db");
 
-const stmt = db.prepare("INSERT INTO users (name, password, versionkey) VALUES (?, ?, 1)");
+const stmt = db.prepare("INSERT INTO users (name, password, versionkey, country) VALUES (?, ?, 1, USA)");
 
 const csv_data = fs.readFileSync("test_users.csv", "utf8");
 csv_data.split("\r\n").forEach((line) => {

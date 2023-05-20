@@ -55,8 +55,8 @@ router.get("/user/:id", (req, res) => {
     res.status(StatusCodes.NOT_FOUND).end();
     return;
   }
-
-  const stmt = db.prepare("SELECT id,name FROM users where id = ?");
+//part 3 final requirement
+  const stmt = db.prepare("SELECT id,name,email,created_on, recovery_email, phone FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {
@@ -139,11 +139,12 @@ router.put("/user/:id", (req, res) => {
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).end();
     return;
   }
-
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
+  //part 3 final requirement
+  const stmt = db.prepare(`UPDATE users SET name=?, email=?, password=?, recovery_email=?, phone=? WHERE id=?`);
 
   try {
-    info = stmt.run([updatedUser.name, updatedUser.password, id]);
+    //update part 3 final requirement
+    info = stmt.run([updatedUser.name, updatedUser.password, updatedUser.email, updatedUser.recovery_email, updatedUser.phone, id]);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
@@ -155,12 +156,53 @@ router.put("/user/:id", (req, res) => {
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
     }
+    //test email format
+    if (!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/.test(updatedUser.email)) {
+      throw new Error('Invalid email format');
+    }
+    //test recovery email format
+    if (!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/.test(updatedUser.recovery_email)) {
+      throw new Error('Invalid recovery email format');
+    }
+    //test phone format
+    if (!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/.test(updatedUser.phone)) {
+      throw new Error('Invalid phone format');
+    }
+
   } catch (err) {
-    if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && err.message.includes("name")) {
       res.statusMessage = "Account with name already exists";
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
     }
+    // error message for email
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && err.message.includes("email")) {
+      res.statusMessage = "Account with email already exists";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+
+    // error for email format
+    if (err.message === "Invalid email format") {
+      res.statusMessage = "Invalid email format";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+
+    // error for recovery email format
+    if (err.message === "Invalid recovery email format") {
+      res.statusMessage = "Invalid recovery email format";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+    // error for phone format
+    if (err.message === "Invalid phone format") {
+      res.statusMessage = "Invalid phone format";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+
+    
     log_event({
       severity: 'Low',
       type: 'InvalidUserUpdate3',
@@ -253,7 +295,32 @@ router.patch("/user/:id", (req, res) => {
       updateClauses.push("password = ?");
       updateParams.push(updatedUser.password);
     }
+    //test email format
+    if ("email" in updatedUser) {
+      updateClauses.push("email = ?");
+      updateParams.push(updatedUser.email);
+      if (!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/.test(updatedUser.email)) {
+        throw new Error('Invalid email format');
+      }
+    }
+    //test recovery email format
+    if ("recovery_email" in updatedUser) {
+      updateClauses.push("recovery_email = ?");
+      updateParams.push(updatedUser.recovery_email);
+      if (!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/.test(updatedUser.recovery_email)) {
+        throw new Error('Invalid recovery email format');
+      }
+    }
+    //test phone format
+    if ("phone" in updatedUser) {
+      updateClauses.push("phone = ?");
+      updateParams.push(updatedUser.phone);
+      if (!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/.test(updatedUser.phone)) {
+        throw new Error('Invalid phone format');
+      }
+    }
 
+    
     const stmt = db.prepare(
       `UPDATE users SET ${updateClauses.join(", ")} WHERE id=?`
     );
@@ -270,11 +337,37 @@ router.patch("/user/:id", (req, res) => {
       return;
     }
   } catch (err) {
-    if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    // error message for name
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && err.message.includes("name")) {
       res.statusMessage = "Account with name already exists";
       res.status(StatusCodes.BAD_REQUEST).end();
       return;
     }
+    // error message for email
+    if (err.code === "SQLITE_CONSTRAINT_UNIQUE" && err.message.includes("email")) {
+      res.statusMessage = "Account with email already exists";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+    // error for email format
+    if (err.message === "Invalid email format") {
+      res.statusMessage = "Invalid email format";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+    // error for recovery email format
+    if (err.message === "Invalid recovery email format") {
+      res.statusMessage = "Invalid recovery email format";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+    // error for phone format
+    if (err.message === "Invalid phone format") {
+      res.statusMessage = "Invalid phone format";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+
     log_event({
       severity: 'Low',
       type: 'InvalidUserPatch4',

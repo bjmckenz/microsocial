@@ -16,6 +16,78 @@ const { validate } = require("../utils/schema-validation");
 
 /**
  * @swagger
+ * /user/{recoveryemail}
+ *  update:
+ *    summary: update recovery email
+ *    description:
+ *    operationId:
+ *    tags:
+ *    parameters:
+ *    
+ */
+router.update("/user/:recoveryemail", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  errors = validate.UserId(id, "{id}");
+  if (errors.length) {
+    log_event({
+      severity: 'Low',
+      type: 'NonexistentUserUpdate',
+      message: `Update for User ${id} failed: format`
+    })
+    res.json(errors);
+    res.statusMessage = "No such user";
+    res.status(StatusCodes.NOT_FOUND).end();
+    return;
+  }
+
+  const updatedUser = req.body;
+
+  errors = validate.UpdatingUser(updatedUser, "{body}");
+  if (errors.length) {
+    log_event({
+      severity: 'Low',
+      type: 'InvalidUserUpdate1',
+      message: `Update for User ${id} failed: ${JSON.stringify(errors)}`
+    })
+    res.json(errors);
+    res.statusMessage = "Invalid update";
+    res.status(StatusCodes.UNPROCESSABLE_ENTITY).end();
+    return;
+  }
+
+  const stmt = db.prepare(`UPDATE users SET recoveryemail=?`);
+
+  try {
+    info = stmt.run([updatedUser.recoveryemail]);
+    if (info.changes < 1) {
+      log_event({
+        severity: 'Low',
+        type: 'InvalidUserUpdate2',
+        message: `Update for User ${id} failed.`
+      })
+      console.log("update error1: ", { err, info, user });
+      res.statusMessage = "Account update failed.";
+      res.status(StatusCodes.BAD_REQUEST).end();
+      return;
+    }
+  } catch (err) {
+    
+    log_event({
+      severity: 'Low',
+      type: 'InvalidUserUpdate3',
+      message: `Update for User ${id} failed: ${JSON.stringify(err)}`
+    })
+    console.log("update error2: ", { err, info, user });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).end();
+    return;
+  }
+
+  res.redirect(`${id}`);
+});
+
+/**
+ * @swagger
  * /user/{id}:
  *   get:
  *     summary: Retrieve a User

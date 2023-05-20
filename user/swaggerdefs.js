@@ -119,13 +119,48 @@
  *           maxLength: 32
  *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
  *           description: Name that they log in with. Must be unique
+ *         phone_number:
+ *           type: string
+ *           minLength: 10
+ *           readOnly: true
+ *           description: The phone number user added
+ *         created:
+ *           type: string
+ *           description: The date accoutn created
+ *         status:
+ *           type: string
+ *           description: User's accoutn status, 1 active, 0 disabled
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by endpoint at creation.
  *       examples: [
- *         { id: 1, name: "alonzo", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", phone_number: "909-999-9999", created: "2023-05-13 20:36:25", status:"active", uri: "http://lh:8/user/14" }
+ *       ]
+ * 
+ *     RetrievedUserPhoneNumber:
+ *       type: object
+ *       summary: User schema submitted when updating.
+ *       properties:
+ *         phone_number:
+ *           type: string
+ *           minLength: 10
+ *           readOnly: true
+ *           description: The phone number user added
+ *       examples: [
+ *         { phone_number: "909-999-9999"}
+ *       ]
+ *     RetrievedUserStatus:
+ *       type: object
+ *       summary: User schema submitted when updating.
+ *       properties:
+ *         status:
+ *           type: string    
+ *           readOnly: true
+ *           description: User's accoutn status, 1 active, 0 disabled
+ *       examples: [
+ *         { phone_number: "active"}
  *       ]
  * 
  * 
@@ -157,6 +192,7 @@
  *       required:
  *         - name
  *         - password
+ *         
  *       properties:
  *         name:
  *           type: string
@@ -169,10 +205,34 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
-
+ *         phone_number:
+ *           type: string
+ *           minLength: 10
+ *           pattern: '^[0-9]{3}-[0-9]{3}-[0-9]{4}$'
+ *           description: Phone number that relates to the user. No need to be unique, since a user may register multiple accounts.
+ *         status:
+ *           type: integer
+ *           minLength: 1
+ *           description: User's accoutn status, 1 active, 0 disabled
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
- *         ]
+ *         { name: "alonzo", password: "lambda", phone_number: "909-999-9999", status: 0 }
+ *       ]
+ * 
+ *     UpdatingPhoneNumber:
+ *       type: object
+ *       summary: User add phone number schema submitted when updating.
+ *       required:
+ *         - phone_number
+ *       properties:
+ *         phone_number:
+ *           type: string
+ *           minLength: 10         
+ *           pattern: '^[0-9]{3}-[0-9]{3}-[0-9]{4}$'  
+ *           description: Phone number that relates to the user. No need to be unique, since a user may register multiple accounts.
+ *            
+ *       examples: [
+ *         {name: "alonzo", password: "lambda", phone_number: "909-999-9999" }
+ *       ]
  * 
  *     PatchingUser:
  *       type: object
@@ -188,8 +248,13 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+*         phone_number:
+ *           type: string
+ *           minLength: 10
+ *           pattern: '^[0-9]{3}-[0-9]{3}-[0-9]{4}$'
+ *           description: Phone number that relates to the user. No need to be unique, since a user may register multiple accounts.   
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", phone_number: "909-999-9999" }
  *       ]
  *
   *     UserFilteringSpec:

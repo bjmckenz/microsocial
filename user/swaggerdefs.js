@@ -47,6 +47,10 @@
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
+ *         dateLastLogin:
+ *           type: string
+ *           readOnly: true
+ *           description: Date of last login
  *       examples: [
  *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
  *       ]

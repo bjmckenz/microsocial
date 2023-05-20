@@ -219,7 +219,7 @@ router.post('/auth/token', async (req, res) => {
  * /auth/login:
  *   post:
  *     summary: Create a login token
- *     description: Logs in a user by creating a expressjwt. Username and password matched against database. No checks for duplicate tokens or expired accounts.
+ *     description: Logs in a user by creating a expressjwt. Username and password matched against database. No checks for duplicate tokens or expired accounts. Will also display the last time user has logged in.
  *     operationId: login
  *     tags: [Auth API]
  *     requestBody:
@@ -274,11 +274,18 @@ router.post('/auth/login', async (req, res) => {
 
   deleteRefreshTokensByUser(logged_in_user.id)
   console.log('Successful login', { logged_in_user })
+  //Gather login time then append it to necessary parts of database
+  var currDate = Date().toLocaleString();
+
+  const stmt = db.prepare(
+      `UPDATE users SET date_last_login=? WHERE id=?`
+    );
+  stmt.run(currDate, logged_in_user.id)
 
   log_event({
     severity: 'Low',
       type: 'Login',
-      message: `User ${logged_in_user.id} '${logged_in_user.name}' logged in from ${req.socket.remoteAddress}`
+      message: `User '${logged_in_user.id}' '${logged_in_user.name}' logged in from '${req.socket.remoteAddress}'` 
     })
 
   const access_token = generateAccessToken({

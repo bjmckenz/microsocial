@@ -1,4 +1,13 @@
+# Final Exam
+Student ID =  888672102 
+% 10 = 2 => ADD DATE OF LAST LOG IN
+Start NULL => could make one when user is created
+
+EC:
+ADD LAST VERSION OF TOU ACCEPTED, starts NULL.
+ADD EMAIL OF ACCOUNT DURING CREATING AND UPDATE
 # microsocial
+
 We're having some fun now!
 
 Fork this, then clone that.

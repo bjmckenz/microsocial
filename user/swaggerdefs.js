@@ -47,8 +47,16 @@
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
+ *         email:
+ *           type: string
+ *           readOnly: true
+ *           description: Email address associated with the account 
+ *         date_created:
+ *           type: string
+ *           readOnly: true
+ *           description: Date of user account creation
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14, email: "ex@mple.com", date_created: "Fri May 19 2023 22:21:39 GMT-0700 (Pacific Daylight Time)" }
  *       ]
  * 
  *     LoginInfo:
@@ -146,8 +154,12 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           description: Email address associated with user.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: ex@mple.com" }
  *       ]
  * 
  * 
@@ -169,9 +181,16 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
-
+ *         touversion:
+ *           type: integer
+ *           minLength: 1
+ *           description: Latest version of Terms of Use that user agreed to.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           description: Email associated with the user account.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", touversion: '2', email: "ex@ample.com" }
  *         ]
  * 
  *     PatchingUser:
@@ -188,8 +207,16 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         touversion:
+ *           type: integer
+ *           minLength: 1
+ *           description: Latest version of Terms of Use that user agreed to.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           description: Email associated with the user account.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", touversion: '2', email: "ex@ample.com" }
  *       ]
  *
   *     UserFilteringSpec:

@@ -42,6 +42,14 @@
  *           minLength: 4
  *           format: password
  *           description: No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           format: email
+ *         country:
+ *           type: string
+ *         recovery_email:
+ *           type: string
+ *           format: email
  *         uri:
  *           type: string
  *           readOnly: true
@@ -119,13 +127,21 @@
  *           maxLength: 32
  *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
  *           description: Name that they log in with. Must be unique
+ *         email:
+ *           type: string
+ *           format: email
+ *         country:
+ *           type: string
+ *         recovery_email:
+ *           type: string
+ *           format: email
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by endpoint at creation.
  *       examples: [
- *         { id: 1, name: "alonzo", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", uri: "http://lh:8/user/14", email: "a@vte.com", country: "Japan", recovery_email: "alt@vte.com" }
  *       ]
  * 
  * 
@@ -146,6 +162,14 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           format: email
+ *         country:
+ *           type: string
+ *         recovery_email:
+ *           type: string
+ *           format: email
  *       examples: [
  *         { name: "alonzo", password: "lambda" }
  *       ]
@@ -169,6 +193,15 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: must be an email
+ *         country:
+ *           type: string
+ *         recovery_email:
+ *           type: string
+ *           format: email
 
  *       examples: [
  *         { name: "alonzo", password: "lambda" }
@@ -188,6 +221,14 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           format: email
+ *         country:
+ *           type: string
+ *         recovery_email:
+ *           type: string
+ *           format: email
  *       examples: [
  *         { name: "alonzo", password: "lambda" }
  *       ]
@@ -252,4 +293,4 @@
  *          //$ref: '#/components/schemas/UserSortingOption'
  * 
  */
- 
+

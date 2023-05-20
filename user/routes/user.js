@@ -56,7 +56,7 @@ router.get("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare("SELECT id,name FROM users where id = ?");
+  const stmt = db.prepare("SELECT id,name,email,country, recovery_email FROM users where id = ?");
   users = stmt.all([id]);
 
   if (users.length < 1) {
@@ -71,6 +71,10 @@ router.get("/user/:id", (req, res) => {
   }
 
   user = users[0];
+  user.email = user.email
+  user.country = user.country
+  user.recovery_email = user.recovery_email
+  console.log(user)
   user.uri = USERS_SERVICE(`/user/${user.id}`);
   res.json(user);
 });
@@ -140,10 +144,20 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
+  //check if email already exists in the database
+  const check = db.prepare(`SELECT * FROM users where email = ?`);
+  existing_emails = check.all([updatedUser.email])
+
+  if (existing_emails.length > 1){
+    res.statusMessage = "email already inside database";
+    res.status(StatusCodes.BAD_REQUEST).end();
+    return;
+  }
+
+  const stmt = db.prepare(`UPDATE users SET name=?, password=?, email=?, country=?, recovery_email=?, WHERE id=?`);
 
   try {
-    info = stmt.run([updatedUser.name, updatedUser.password, id]);
+    info = stmt.run([updatedUser.name, updatedUser.password, updatedUser.email, updatedUser.country, updatedUser.recovery_email, id]);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
@@ -252,6 +266,29 @@ router.patch("/user/:id", (req, res) => {
     if ("password" in updatedUser) {
       updateClauses.push("password = ?");
       updateParams.push(updatedUser.password);
+    }
+
+    if ("email" in updatedUser) {
+      // const check = db.prepare(`SELECT * FROM users where email = ?`);
+      // existing_emails = check.all([user.email])
+    
+      // if (existing_emails.length > 1){
+      //   res.statusMessage = "email already inside database";
+      //   res.status(StatusCodes.BAD_REQUEST).end();
+      //   return;
+      // } attempt to make a check for when email already exists on a different account for patch does not work like this
+      updateClauses.push("email = ?");
+      updateParams.push(updatedUser.email);
+    }
+
+    if ("country" in updatedUser) {
+      updateClauses.push("country = ?");
+      updateParams.push(updatedUser.country);
+    }
+
+    if ("recovery_email" in updatedUser) {
+      updateClauses.push("country = ?");
+      updateParams.push(updatedUser.country);
     }
 
     const stmt = db.prepare(

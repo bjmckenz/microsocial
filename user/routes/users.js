@@ -592,11 +592,22 @@ router.post('/users', (req, res) => {
     return
   }
 
-  const stmt = db.prepare(`INSERT INTO users (name, password)
-                 VALUES (?, ?)`)
+  //check if email is in the database already
+  const check = db.prepare(`SELECT * FROM users where email = ?`);
+  existing_emails = check.all([user.email])
+
+  if (existing_emails.length >= 1){
+    // res.json("email already inside database") this has to be commented or the status code is returned incorrectly
+    res.statusMessage = "email already inside database"
+    res.status(StatusCodes.BAD_REQUEST).end()
+    return
+  }
+
+  const stmt = db.prepare(`INSERT INTO users (name, password, email, country, recovery_email)
+                 VALUES (?, ?, ?, ?, ?)`)
 
   try {
-    info = stmt.run([user.name, user.password])
+    info = stmt.run([user.name, user.password, user.email, user.country, user.recovery_email])
   } catch (err) {
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       log_event({
@@ -612,7 +623,7 @@ router.post('/users', (req, res) => {
     log_event({
       severity: 'Low',
       type: 'CannotCreateUser',
-      message: `Create ${[ser.name, user.password]} failed: ${err}`
+      message: `Create ${[user.name, user.password, user.email, user.country, user.recovery_email]} failed: ${err}`
     })
     console.log('insert error: ', { err, info, user })
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end()

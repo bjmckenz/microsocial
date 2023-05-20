@@ -179,14 +179,14 @@ router.post("/relationships", (req, res) => {
   }
 
   //check if the user is trying to make relationship with itself
-  const check2 = db.prepare(`SELECT * FROM relationships where user_id = following_user_id`)
-  i =  check2.all([realtionship.user_id, relationship.following_user_id])
-  if (i > 0){
-    res.json("cannot create relationship with self")
-    res.statusMessage = "cannot create relationship with self"
-    res.status(StatusCodes.UNPROCESSABLE_ENTITY).end();
-    return
-  }
+  // const check2 = db.prepare(`SELECT * FROM relationships where user_id = following_user_id`)
+  // i =  check2.all([relationship.user_id, relationship.following_user_id])
+  // if (i > 0){
+  //   res.json("cannot create relationship with self")
+  //   res.statusMessage = "cannot create relationship with self"
+  //   res.status(StatusCodes.UNPROCESSABLE_ENTITY).end();
+  //   return;
+  // }
   
   //actually put it into the database
   const stmt = db.prepare(`INSERT INTO relationships (user_id, following_user_id)

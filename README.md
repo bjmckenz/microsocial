@@ -1,4 +1,9 @@
+# Final Exam
+Student ID =  888672102 
+% 10 = 2 => ADD DATE OF LAST LOG IN
+
 # microsocial
+
 We're having some fun now!
 
 Fork this, then clone that.

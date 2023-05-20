@@ -592,11 +592,11 @@ router.post('/users', (req, res) => {
     return
   }
 
-  const stmt = db.prepare(`INSERT INTO users (name, password)
-                 VALUES (?, ?)`)
+  const stmt = db.prepare(`INSERT INTO users (name, password, email)
+                 VALUES (?, ?, ?)`)
 
   try {
-    info = stmt.run([user.name, user.password])
+    info = stmt.run([user.name, user.password, user.email])
   } catch (err) {
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       log_event({

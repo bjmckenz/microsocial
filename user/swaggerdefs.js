@@ -47,12 +47,12 @@
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
- *         dateLastLogin:
+ *         email:
  *           type: string
  *           readOnly: true
- *           description: Date of last login
+ *           description: Email address associated with the account 
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14, email: ex@mple.com" }
  *       ]
  * 
  *     LoginInfo:
@@ -150,8 +150,12 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           description: Email address associated with user.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: ex@mple.com" }
  *       ]
  * 
  * 
@@ -177,8 +181,12 @@
  *           type: integer
  *           minLength: 1
  *           description: Latest version of Terms of Use that user agreed to.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           description: Email associated with the user account.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", touversion: '2', email: "ex@ample.com" }
  *         ]
  * 
  *     PatchingUser:
@@ -199,8 +207,12 @@
  *           type: integer
  *           minLength: 1
  *           description: Latest version of Terms of Use that user agreed to.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           description: Email associated with the user account.
  *       examples: [
- *         { name: "alonzo", password: "lambda", touversion: '2' }
+ *         { name: "alonzo", password: "lambda", touversion: '2', email: "ex@ample.com" }
  *       ]
  *
   *     UserFilteringSpec:

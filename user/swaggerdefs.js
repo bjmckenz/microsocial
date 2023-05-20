@@ -25,6 +25,10 @@
  *         - id
  *         - name
  *         - password
+ *         - email
+ *         - created_on
+ *         - recovery_email
+ *         - phone
  *       properties:
  *         id:
  *           type: integer
@@ -42,13 +46,32 @@
  *           minLength: 4
  *           format: password
  *           description: No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email needs to be unique
+ *         created_on:
+ *           type: string
+ *           format: date-time
+ *           description: When the user was created.
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email does not have to be unique
+ *         phone:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/'
+ *           description: Phone number
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by API at User creation.
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", password: "lambda", email: "juju5@gmail.com", created_on: "2023-05-20 00:36:03", recovery_email: "wenwen@gmail.com", phone: "626-333-3333", uri: "http://lh:8/user/14" }
  *       ]
  * 
  *     LoginInfo:
@@ -119,13 +142,32 @@
  *           maxLength: 32
  *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
  *           description: Name that they log in with. Must be unique
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email needs to be unique
+ *         created_on:
+ *           type: string
+ *           format: date-time
+ *           description: When the user was created.
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email does not have to be unique
+ *         phone:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/'
+ *           description: Phone number
  *         uri:
  *           type: string
  *           readOnly: true
  *           format: password
  *           description: URI to this object. Set by endpoint at creation.
  *       examples: [
- *         { id: 1, name: "alonzo", uri: "http://lh:8/user/14" }
+ *         { id: 1, name: "alonzo", email: "juju5@gmail.com", created_on: "2023-05-20 00:36:03", recovery_email: "wenwen@gmail.com", phone: "626-333-3333", uri: "http://lh:8/user/14" }
  *       ]
  * 
  * 
@@ -134,6 +176,9 @@
  *       required:
  *         - name
  *         - password
+ *         - email
+ *         - recovery_email
+ *         - phone
  *       properties:
  *         name:
  *           type: string
@@ -146,8 +191,27 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email needs to be unique
+ *         created_on:
+ *           type: string
+ *           format: date-time
+ *           description: When the user was created.
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email does not have to be unique
+ *         phone:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/'
+ *           description: Phone number
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: "juju5@gmail.com", created_on: "2023-05-20 00:36:03", recovery_email: "wenwen@gmail.com", phone: "626-333-3333" }
  *       ]
  * 
  * 
@@ -157,6 +221,9 @@
  *       required:
  *         - name
  *         - password
+ *         - email
+ *         - recovery_email
+ *         - phone
  *       properties:
  *         name:
  *           type: string
@@ -164,6 +231,21 @@
  *           maxLength: 32
  *           pattern: '^[A-Za-z0-9_.-]{1,32}$'
  *           description: Name that they log in with. Must be unique
+*         email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email needs to be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email does not have to be unique
+ *         phone:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/'
+ *           description: Phone number
  *         password:
  *           type: string
  *           minLength: 4
@@ -171,7 +253,7 @@
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
 
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: "juju5@gmail.com", created_on: "2023-05-20 00:36:03", recovery_email: "wenwen@gmail.com", phone: "626-333-3333"  }
  *         ]
  * 
  *     PatchingUser:
@@ -188,8 +270,23 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email needs to be unique
+ *         recovery_email:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/'
+ *           description: Email does not have to be unique
+ *         phone:
+ *           type: string
+ *           minLength: 1
+ *           format: '!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/'
+ *           description: Phone number
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", email: "juju5@gmail.com", created_on: "2023-05-20 00:36:03", recovery_email: "wenwen@gmail.com", phone: "626-333-3333" }
  *       ]
  *
   *     UserFilteringSpec:
@@ -252,4 +349,3 @@
  *          //$ref: '#/components/schemas/UserSortingOption'
  * 
  */
- 

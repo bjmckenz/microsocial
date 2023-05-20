@@ -315,9 +315,10 @@ function respond_directly_with_query (req, res) {
   const [where_clause, where_vals] = where_clause_from_query(req)
 
   const sort_clause = sort_clause_SQL(req)
+  // part3 final requirement
   const get_users_sql =
     `SELECT ` +
-    `id,name,versionkey ` +
+    `id,name,versionkey,email,created_on,recovery_email,phone ` +
     `FROM ` +
     `users` +
     where_clause +
@@ -591,14 +592,24 @@ router.post('/users', (req, res) => {
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).end()
     return
   }
-
-  const stmt = db.prepare(`INSERT INTO users (name, password)
-                 VALUES (?, ?)`)
+//part 3 final requirement
+  const stmt = db.prepare(`INSERT INTO users (name, password, email, recovery_email,phone)
+                 VALUES (?, ?, ?, ?, ?)`)
 
   try {
-    info = stmt.run([user.name, user.password])
+    if (!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/.test(user.email)) {
+      throw new Error('Invalid email format');
+    }
+    if (!/^[A-Za-z0-9_.-]{1,64}@[A-Za-z0-9_.-]{1,64}$/.test(user.recovery_email)) {
+      throw new Error('Invalid recovery email format');
+    }
+    if (!/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/.test(user.phone)) {
+      throw new Error('Invalid phone format');
+    }
+    info = stmt.run([user.name, user.password, user.email, user.recovery_email, user.phone])
   } catch (err) {
-    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+//error message for name
+    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' && err.message.includes('name')) {
       log_event({
         severity: 'Low',
         type: 'NonUniqueNameCreateRequest',
@@ -609,6 +620,51 @@ router.post('/users', (req, res) => {
       res.status(StatusCodes.BAD_REQUEST).end()
       return
     }
+//error message for email unique
+    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' && err.message.includes('email')) {
+      log_event({
+        severity: 'Low',
+        type: 'InvalidEmailCreateRequest',
+        message: `Create Request for User ${user.email} received with invalid email.`
+      })
+      res.statusMessage = 'Invalid email'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+//error if email not valid format
+    if (err.message === 'Invalid email format') {
+      log_event({
+        severity: 'Low',
+        type: 'InvalidEmailCreateRequest',
+        message: `Create Request for User ${user.email} received with invalid email.`
+      })
+      res.statusMessage = 'Invalid email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+//error if recovery email not valid format
+    if (err.message === 'Invalid recovery email format') {
+      log_event({
+        severity: 'Low',
+        type: 'InvalidRecoveryEmailCreateRequest',
+        message: `Create Request for User ${user.recovery_email} received with invalid recovery email.`
+      })
+      res.statusMessage = 'Invalid recovery email format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+//error if phone not valid format
+    if (err.message === 'Invalid phone format') {
+      log_event({
+        severity: 'Low',
+        type: 'InvalidPhoneCreateRequest',
+        message: `Create Request for User ${user.phone} received with invalid phone.`
+      })
+      res.statusMessage = 'Invalid phone format'
+      res.status(StatusCodes.BAD_REQUEST).end()
+      return
+    }
+
     log_event({
       severity: 'Low',
       type: 'CannotCreateUser',

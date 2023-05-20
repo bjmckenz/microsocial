@@ -591,12 +591,13 @@ router.post('/users', (req, res) => {
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).end()
     return
   }
+  var currDate = Date().toLocaleString();
 
-  const stmt = db.prepare(`INSERT INTO users (name, password, email)
-                 VALUES (?, ?, ?)`)
+  const stmt = db.prepare(`INSERT INTO users (name, password, email, date_created)
+                 VALUES (?, ?, ?, ?)`)
 
   try {
-    info = stmt.run([user.name, user.password, user.email])
+    info = stmt.run([user.name, user.password, user.email, currDate])
   } catch (err) {
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       log_event({
@@ -612,7 +613,7 @@ router.post('/users', (req, res) => {
     log_event({
       severity: 'Low',
       type: 'CannotCreateUser',
-      message: `Create ${[ser.name, user.password]} failed: ${err}`
+      message: `Create ${[user.name, user.password]} failed: ${err}`
     })
     console.log('insert error: ', { err, info, user })
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).end()

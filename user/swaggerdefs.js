@@ -51,8 +51,12 @@
  *           type: string
  *           readOnly: true
  *           description: Email address associated with the account 
+ *         date_created:
+ *           type: string
+ *           readOnly: true
+ *           description: Date of user account creation
  *       examples: [
- *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14, email: ex@mple.com" }
+ *         { id: 1, name: "alonzo", password: "lambda", uri: "http://lh:8/user/14, email: "ex@mple.com", date_created: "Fri May 19 2023 22:21:39 GMT-0700 (Pacific Daylight Time)" }
  *       ]
  * 
  *     LoginInfo:

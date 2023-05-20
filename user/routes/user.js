@@ -140,10 +140,10 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
+  const stmt = db.prepare(`UPDATE users SET name=?, password=?, touversion=? WHERE id=?`);
 
   try {
-    info = stmt.run([updatedUser.name, updatedUser.password, id]);
+    info = stmt.run([updatedUser.name, updatedUser.password, updatedUser.touversion, id]);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
@@ -252,6 +252,14 @@ router.patch("/user/:id", (req, res) => {
     if ("password" in updatedUser) {
       updateClauses.push("password = ?");
       updateParams.push(updatedUser.password);
+    }
+
+    if ("touversion" in updatedUser) {
+      //Postman does not work properly with this
+      //Need to send as json to properly send
+      const num = parseInt(updatedUser.touversion);
+      updateClauses.push("touversion = ?")
+      updateParams.push(num)
     }
 
     const stmt = db.prepare(

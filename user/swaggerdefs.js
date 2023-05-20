@@ -173,7 +173,10 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
-
+ *         touversion:
+ *           type: integer
+ *           minLength: 1
+ *           description: Latest version of Terms of Use that user agreed to.
  *       examples: [
  *         { name: "alonzo", password: "lambda" }
  *         ]
@@ -192,8 +195,12 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         touversion:
+ *           type: integer
+ *           minLength: 1
+ *           description: Latest version of Terms of Use that user agreed to.
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", touversion: '2' }
  *       ]
  *
   *     UserFilteringSpec:

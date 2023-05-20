@@ -92,7 +92,7 @@ function deleteRefreshTokenById (token_id) {
 
 function getUserByNameAndPassword (user_name, user_pass) {
   const getUserSql =
-    'SELECT id, name FROM users WHERE name = ? AND password = ?'
+    "SELECT id, name FROM users WHERE name = ? AND password = ? AND status = 'Active'"
   user = db.get(getUserSql, [user_name, user_pass])
   return user
 }

@@ -140,10 +140,10 @@ router.put("/user/:id", (req, res) => {
     return;
   }
 
-  const stmt = db.prepare(`UPDATE users SET name=?, password=? WHERE id=?`);
+  const stmt = db.prepare(`UPDATE users SET name=?, status =?, password=? WHERE id=?`);
 
   try {
-    info = stmt.run([updatedUser.name, updatedUser.password, id]);
+    info = stmt.run([updatedUser.name, updatedUser.status, updatedUser.password, id]);
     if (info.changes < 1) {
       log_event({
         severity: 'Low',
@@ -247,6 +247,11 @@ router.patch("/user/:id", (req, res) => {
     if ("name" in updatedUser) {
       updateClauses.push("name = ?");
       updateParams.push(updatedUser.name);
+    }
+
+    if ("status" in updatedUser) {
+      updateClauses.push("status = ?");
+      updateParams.push(updatedUser.status);
     }
 
     if ("password" in updatedUser) {

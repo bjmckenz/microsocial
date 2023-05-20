@@ -146,8 +146,12 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
+ *         status:
+ *           type: string
+ *           nullable: true
+ *           enum: [ Active, Inactive ]
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda", status: "Active" }
  *       ]
  * 
  * 
@@ -169,9 +173,12 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API. description Columns to sort by, separated by commas. Names are case-insensitive. Sorts are ascending unless a "-" is given. "+" is accepted but is unnecessary. Acceptable columns are id and name.
-
+           status:
+ *           type: string
+ *           nullable: true
+ *           enum: [ Active, Inactive ]
  *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         { name: "alonzo", password: "lambda" , status: "Active"}
  *         ]
  * 
  *     PatchingUser:
@@ -188,8 +195,11 @@
  *           minLength: 4
  *           format: password
  *           description: Guess. No leading or trailing spaces. Never returned by an API.
- *       examples: [
- *         { name: "alonzo", password: "lambda" }
+ *         status:
+ *           type: string
+ *           nullable: true
+ *           enum: [ Active, Inactive ]
+ *         examples: [{ name: "alonzo", password: "lambda", status: "Active"}
  *       ]
  *
   *     UserFilteringSpec:
